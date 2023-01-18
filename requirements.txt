@@ -1,0 +1,6 @@
+pdfminer.six
+matplotlib
+scikit-image
+python-dateutil
+holidays
+icalendar

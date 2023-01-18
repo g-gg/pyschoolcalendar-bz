@@ -8,7 +8,7 @@ The calendar follows the resolution #75 of the provincial council from the 23 ja
 
 schulkalender.py reads the published PDF documents, and to parses them into the iCalendar format - a format, that can be imported to any major calendar application (i.e. Outlook, Google Calendar, macOS Calendar).
 
-##Usage
+## Usage
 The software is purely written in python. Before running, download the calendars of interest ot the input folder.
 ```
 cd schulkalender
@@ -17,7 +17,7 @@ python schulkalender.py
 ```
 For any PDF file found in the input folder, the software will try to create a ics file in the output directory.
 
-##Remarks
+## Remarks
 At the time of writing the published calendars include the years 2022/23 to 2029/30. Due to a mistake in the 2024/25 calendar, that file is missing in the output folder.
 
 

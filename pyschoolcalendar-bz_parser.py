@@ -50,7 +50,7 @@ def ParseDay(s):
             raise Exception('could not interpret day cell', s)
     return result
 
-class SchoolCalendar:
+class SchoolCalendarParser:
     def __init__(self, filename, outputdir=None):
         self.filename = filename
         self.filled_rectangles = list()
@@ -59,8 +59,8 @@ class SchoolCalendar:
         self.weekdays_counted = list() # counts the school days
         self.schuljahr = None
         self.years = list()
-        self.unterrichtsbeginn = None
-        self.unterrichtsende = None
+        self.firstTeachingDay = None
+        self.lastTeachingDay = None
         self.month_columns = list()
         self.page_bbox = None
         self.uncovered_days = 0
@@ -154,9 +154,9 @@ class SchoolCalendar:
                 self.schuljahr = t[1][len('schuljahr '):]
                 print(t[1])
             elif t[1].lower().startswith('unterrichtsbeginn: '):
-                self.unterrichtsbeginn = ParseLongDate(t[1][len('unterrichtsbeginn: '):])
+                self.firstTeachingDay = ParseLongDate(t[1][len('unterrichtsbeginn: '):])
             elif t[1].lower().startswith('unterrichtsende: '):
-                self.unterrichtsende = ParseLongDate(t[1][len('unterrichtsende: '):])
+                self.lastTeachingDay = ParseLongDate(t[1][len('unterrichtsende: '):])
             elif t[1] == 'Wochentage':
                 wochentage_yc = t[0][1]
             elif t[1] in ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'Insgesamt']:
@@ -173,8 +173,8 @@ class SchoolCalendar:
         self.years = sorted(self.years)
         assert len(self.years) == 2, "calendar doesn't cover 2 years"
         assert self.schuljahr != None, "couldn't find schuljahr"
-        assert self.unterrichtsbeginn != None, "couldn't find unterrichtsbeginn"
-        assert self.unterrichtsende != None, "couldn't find unterrichtsende"
+        assert self.firstTeachingDay != None, "couldn't find unterrichtsbeginn"
+        assert self.lastTeachingDay != None, "couldn't find unterrichtsende"
         assert len(self.wochentage) == 7, "couldn't find all weekdays (sum)" # saturday is included, sunday not, last is the sum
         assert self.unterrichtstage != None, "couldn't find unterrichtstage"
 
@@ -241,10 +241,10 @@ class SchoolCalendar:
         for d in self.days:
             if d[1]: # only school days
                 if not first_checked:
-                    assert d[0] == self.unterrichtsbeginn, "unterrichtsbeginn doesn't match the calendar"
+                    assert d[0] == self.firstTeachingDay, "unterrichtsbeginn doesn't match the calendar"
                     first_checked = True
                 last_day = d[0]
-        assert last_day == self.unterrichtsende, "unterrichtsende doesn't match the calendar"
+        assert last_day == self.lastTeachingDay, "unterrichtsende doesn't match the calendar"
         assert len(self.days) == (self.days[-1][0] - self.days[0][0]).days + 1, 'the number of extracted days is not covering the whole period'
         assert weekdays_sum == sum(weekdays_stats), "the sum of weekdays in the stats row doesn't add up"
         assert weekdays_sum == sum(self.weekdays_counted), "the sum of weekdays doesn't match with counted ones"
@@ -296,7 +296,7 @@ class SchoolCalendar:
     def identifyHolidays(self):
         public_holidays = list()
         for holiday in holidays.Italy(subdiv='BZ', years=self.years).items():
-            if holiday[0] >= self.unterrichtsbeginn and holiday[0] <= self.unterrichtsende:
+            if holiday[0] >= self.firstTeachingDay and holiday[0] <= self.lastTeachingDay:
                 public_holidays.append(holiday[0])
 
         begin_holiday = None
@@ -356,8 +356,8 @@ if __name__ == "__main__":
     for file in os.listdir('input'):
         if os.path.splitext(file)[1] == '.pdf':
             if file.find('24-25')>=0:
-                # they put eastern on the wrong day
+                # eastern/carnival on the wrong day
                 print('skipping', file)
                 continue
-            sc = SchoolCalendar(os.path.join('input', file), outputdir='output')
+            sc = SchoolCalendarParser(os.path.join('input', file), outputdir='output')
             #break

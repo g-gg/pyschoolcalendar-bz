@@ -17,7 +17,7 @@ Clone the github repository to a folder of your choice.
 ```shell
 git clone https://github.com/g-gg/pyschoolcalendar-bz.git
 ```
-Then make sure all required packages are installed.
+Then make sure all required python packages are installed.
 ```shell
 pip install -r requirements.txt
 ```
@@ -50,5 +50,6 @@ python pyschoolcalendar-bz_generator.py
 
 ## Remarks
 At the time of writing the published calendars include the years 2022/23 to 2029/30. Due to a mistake in the 2024/25 calendar, that file is missing in the output folder.
+
 
 

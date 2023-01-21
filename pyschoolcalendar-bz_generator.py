@@ -7,33 +7,31 @@ import holidays
 import os
 from icalendar import Calendar, Event
 from enum import IntEnum, Enum
+from pdfschoolcalendar import PdfSchoolCalendar
 
 Weekday = IntEnum('Weekday', 'MONDAY TUESDAY WEDNESDAY THURSDAY FRIDAY SATURDAY SUNDAY', start=0)
-Language = Enum('Language', 'en it de')
 SchoolHolidays = Enum('SchoolHolidays', 'SchoolHolidays Summer AllSaints Christmas Winter Easter LongWeekend Shortened')
 Strings = { 
-            SchoolHolidays.SchoolHolidays: {Language.en: 'School holidays', Language.it: 'Ferie scolastiche', Language.de: 'Schulferien'},
-            SchoolHolidays.Summer: {Language.en: 'Summer', Language.it: 'Estate', Language.de: 'Sommer'},
-            SchoolHolidays.AllSaints: {Language.en: 'All Saints', Language.it: 'Tutti i santi', Language.de: 'Allerheiligen'},
-            SchoolHolidays.Christmas: {Language.en: 'Christmas', Language.it: 'Natale', Language.de: 'Weihnachten'},
-            SchoolHolidays.Winter: {Language.en: 'Carnival', Language.it: 'Carnevale', Language.de: 'Fasching'},
-            SchoolHolidays.Easter: {Language.en: 'Easter', Language.it: 'Pasqua', Language.de: 'Ostern'},
-            SchoolHolidays.LongWeekend: {Language.en: 'Long weekend', Language.it: 'Ponte', Language.de: 'Fenstertag'},
-            SchoolHolidays.Shortened: {Language.en: 'School ends earlier', Language.it: 'Orario ridotto', Language.de: 'Verkürzter Unterricht'}}
+            SchoolHolidays.SchoolHolidays: {'en': 'School holidays', 'it': 'Ferie scolastiche', 'de': 'Schulferien', 'la': 'Feries de scola'},
+            SchoolHolidays.Summer: {'en': 'Summer', 'it': 'Estate', 'de': 'Sommer', 'la': 'Instà'},
+            SchoolHolidays.AllSaints: {'en': 'All Saints', 'it': 'Tutti i santi', 'de': 'Allerheiligen', 'la': 'Unissant'},
+            SchoolHolidays.Christmas: {'en': 'Christmas', 'it': 'Natale', 'de': 'Weihnachten', 'la': 'Nadel'},
+            SchoolHolidays.Winter: {'en': 'Carnival', 'it': 'Carnevale', 'de': 'Fasching', 'la': 'Carnescià'},
+            SchoolHolidays.Easter: {'en': 'Easter', 'it': 'Pasqua', 'de': 'Ostern', 'la': 'Pasca'},
+            SchoolHolidays.LongWeekend: {'en': 'Long weekend', 'it': 'Ponte', 'de': 'Fenstertag', 'la': 'puent'},
+            SchoolHolidays.Shortened: {'en': 'School ends earlier', 'it': 'Orario ridotto', 'de': 'Verkürzter Unterricht', 'la': 'śareda abenëura'}}
 
 class SchoolCalendarGenerator:    
-    def __init__(self, first_year, outputfile, six_days_week=False, language=Language.en, norm='narrow'):
+    def __init__(self, first_year, six_days_week=False, language='en', norm='narrow'):
         self.years = [first_year, first_year+1]
         self.six_days_week = six_days_week # otherwise 5 days are assumed
         self.schoolyear_period = (date(self.years[0], 9, 1), date(self.years[1], 8, 31))
         self.language = language
-        self.outputfile = outputfile
         self.public_holidays = holidays.Italy(subdiv='BZ', years=self.years)
         self.norm = norm
 
         self.calculateHolidays()
-        self.exportCalendar()
-
+    
     def precedingWeekday(self, d, day_of_the_week):
         while d.weekday() != day_of_the_week:
             d -= timedelta(1)
@@ -104,6 +102,12 @@ class SchoolCalendarGenerator:
         end = self.followingWeekday(ash_wednesday, Weekday.FRIDAY)
         return (start, end, Strings[SchoolHolidays.Winter][self.language])
     
+    def fatThursday(self):
+        # https://en.wikipedia.org/wiki/Fat_Thursday
+        d = easter(self.years[1]) - timedelta(52)
+        assert d.weekday() == Weekday.THURSDAY
+        return d
+
     def maundyThursday(self):
         # https://en.wikipedia.org/wiki/Maundy_Thursday
         d = easter(self.years[1]) - timedelta(3)
@@ -141,8 +145,9 @@ class SchoolCalendarGenerator:
         #  shortened on Maundy Thursday.
         shortened_time = list()
         shortened_time.append(self.firstTeachingDay())
-        shortened_time.append(self.maundyThursday())
+        shortened_time.append(self.fatThursday())
         shortened_time.append(self.lastTeachingDay())
+        return shortened_time
 
     def normPeriod(self, period: tuple[date, date, str], action='narrow', scope='both'):
         start = period[0]
@@ -206,9 +211,9 @@ class SchoolCalendarGenerator:
         if shortened:
             for d in shortened:
                 # is only single days, so no norming required
-                self.holidays.append(((d, d), Strings[SchoolHolidays.Shortened][self.language]))
+                self.warnings.append((d, d, Strings[SchoolHolidays.Shortened][self.language]))
 
-    def exportCalendar(self):
+    def exportCalendarIcs(self, outputfile):
         cal = Calendar()
         for h in self.holidays:
             e = Event()
@@ -217,10 +222,17 @@ class SchoolCalendarGenerator:
             e.add('summary', Strings[SchoolHolidays.SchoolHolidays][self.language] +' (' + h[2] + ')')
             cal.add_component(e)
 
-        with open(self.outputfile, "wb") as f:
+        with open(outputfile, "wb") as f:
             f.write(cal.to_ical())
 
+    def exportCalendarPdf(self, outputfile):
+        sc = PdfSchoolCalendar(outputfile, self.schoolyear_period, [self.firstTeachingDay(), self.lastTeachingDay()], self.holidays, self.warnings, self.language)
+
 if __name__ == "__main__":
-    for year in range(2022, 2030):
-        filename = f'School calendar {year}-{(year+1)%100}_generated.ics'
-        sc = SchoolCalendarGenerator(year, os.path.join('output', filename))
+    for language in ['en', 'it', 'de', 'la']:
+        for year in range(2022, 2030):
+            filename = f'SchoolCalendar{year}-{(year+1)%100}_{language}'
+            sc = SchoolCalendarGenerator(year, language=language)
+            sc.exportCalendarIcs(os.path.join('output', filename + '.ics'))
+            sc.exportCalendarPdf(os.path.join('output', filename + '.pdf'))
+        

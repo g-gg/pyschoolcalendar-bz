@@ -4,3 +4,4 @@ scikit-image
 python-dateutil
 holidays
 icalendar
+reportlab

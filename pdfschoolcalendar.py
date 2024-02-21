@@ -99,7 +99,7 @@ class PdfSchoolCalendar:
         self.public_holidays = holidays.Italy(subdiv='BZ', years=self.years)
         e = easter(self.years[1])
         self.particular_days_abbrev = {e: {'en': 'Easter', 'de': 'Ostern', 'it': 'Pasqua', 'la': 'Pasca'},
-            (e - timedelta(7)): {'en': 'Palm', 'de': 'Ostern', 'it': 'Palme', 'la': 'Ulif'},
+            (e - timedelta(7)): {'en': 'Palm', 'de': 'PalmSo', 'it': 'Palme', 'la': 'Ulif'},
             (e - timedelta(46)): {'en': 'Ash', 'de': 'Aschm.', 'it': 'Cenere', 'la': 'Capion'},
             (e - timedelta(47)): {'en': 'Carniv.', 'de': 'Fasch.', 'it': 'Carnev.', 'la': 'Carnes.'},
             (e - timedelta(52)): {'en': 'Fat', 'de': 'Unsin.', 'it': 'g.gras.', 'la': 'j.gras.'},

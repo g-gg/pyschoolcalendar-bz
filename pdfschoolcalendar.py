@@ -211,8 +211,11 @@ class PdfSchoolCalendar:
                     if (day.weekday()>=weekendstart) or self.is_holiday(day) or (day in self.public_holidays):
                         if (not day in self.public_holidays) and (day.weekday()<weekendstart):
                             self.uncovered_weekdays += 1
-                        red_cells.append(('BACKGROUND', (c, d), (c+1, d), colors.darkred))
-                        red_cells.append(('TEXTCOLOR', (c, d), (c+1, d), colors.white))
+                            red_cells.append(('BACKGROUND', (c, d), (c+1, d), colors.darkorange))
+                            red_cells.append(('TEXTCOLOR', (c, d), (c+1, d), colors.white))
+                        else:
+                            red_cells.append(('BACKGROUND', (c, d), (c+1, d), colors.darkolivegreen))
+                            red_cells.append(('TEXTCOLOR', (c, d), (c+1, d), colors.white))
                     else:
                         self.day_stats[day.weekday()] += 1
                         if self.is_warning(day):

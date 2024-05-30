@@ -21,6 +21,7 @@ strings['last_teaching_day'] = {'en': 'Last teaching day', 'de': 'Unterrichtsend
 strings['days_of_the_week'] = {'en': 'Days of the week', 'de': 'Wochentage', 'it': 'giorni settimalali', 'la': 'di dl’ena'}
 strings['school_days'] = {'en': 'School days', 'de': 'Unterrichtstage', 'it': 'giorni di scuola', 'la': 'di de nseniamënt'}
 strings['total'] = {'en': 'Total', 'de': 'Insgesamt', 'it': 'somma', 'la': 'soma'}
+strings['uncovered_weekdays'] = {'en': 'Workdays without school', 'de': 'Schulfreie Arbeitstage', 'it': 'Giorni lavorativi senza scuola', 'la': 'jiens de lavur senza scola'}
 strings['about'] = {'en': 'This calendar was created according to the resolution no. 75 of the provincial council from 23 january 2012 with <link href="https://github.com/g-gg/pyschoolcalendar-bz">pyschoolcalendar-bz</link>.',
     'de': 'Dieser Schulkalender wurde gemäß Beschluss der Landesregierung vom 23. Jänner 2012, Nr. 75, von <link href="https://github.com/g-gg/pyschoolcalendar-bz">pyschoolcalendar-bz</link> erstellt.',
     'it': 'Questo calendario scolastico è stato creato a secondo la delibera n. 75 della giunta provinciale del 23 gennaio 2012 con <link href="https://github.com/g-gg/pyschoolcalendar-bz">pyschoolcalendar-bz</link>.',
@@ -189,6 +190,7 @@ class PdfSchoolCalendar:
 
         red_cells = list()
         self.day_stats = [0] * 6
+        self.uncovered_weekdays = 0
         for d in range(1,32):
             day_row = list()
             c = 0
@@ -207,6 +209,8 @@ class PdfSchoolCalendar:
                         weekendstart = 5
 
                     if (day.weekday()>=weekendstart) or self.is_holiday(day) or (day in self.public_holidays):
+                        if (not day in self.public_holidays) and (day.weekday()<weekendstart):
+                            self.uncovered_weekdays += 1
                         red_cells.append(('BACKGROUND', (c, d), (c+1, d), colors.darkred))
                         red_cells.append(('TEXTCOLOR', (c, d), (c+1, d), colors.white))
                     else:
@@ -247,6 +251,8 @@ class PdfSchoolCalendar:
         for w in range(0, 6): # mon to sat
             row.append(strings_weekdays[self.language][w])
         row.append(strings['total'][self.language])
+        row.append('')
+        row.append(strings['uncovered_weekdays'][self.language])
         data.append(row)
         row = [strings['school_days'][self.language], '']
         total = 0
@@ -254,13 +260,16 @@ class PdfSchoolCalendar:
             row.append(str(self.day_stats[w]))
             total += self.day_stats[w]
         row.append(str(total))
+        row.append('')
+        row.append(str(self.uncovered_weekdays))
         data.append(row)
         
         t = Table(data, colWidths=20*units.mm, rowHeights=self.rowheight)
         style = [
             ('ALIGN', (0,0), (-1,-1), 'CENTER'),
             ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
-            ('INNERGRID', (2,0), (-1,-1), 1, colors.black),
+            ('INNERGRID', (2,0), (-3,-1), 1, colors.black),
+            ('INNERGRID', (-1,0), (-1,-1), 1, colors.black),
             ('FONTSIZE', (0,0), (-1,-1), self.smallfontsize),
             ]
             
@@ -274,8 +283,8 @@ class PdfSchoolCalendar:
         self.elements.append(Paragraph(strings['about'][self.language], normal))
 
 if __name__ == "__main__":
-    holidays = list()
-    holidays.append((date(2022,9,1), date(2022,9,2)))
+    holidays_list = list()
+    holidays_list.append((date(2022,9,1), date(2022,9,2)))
     schoolyear_period = [date(2022,9,1), date(2023,8,31)]
     teaching_period = [date(2022,9,5), date(2023,6,15)]
-    sc = PdfSchoolCalendar('test.pdf', schoolyear_period, teaching_period, holidays, [], language='la')
+    sc = PdfSchoolCalendar('test.pdf', schoolyear_period, teaching_period, holidays_list, [], language='la')

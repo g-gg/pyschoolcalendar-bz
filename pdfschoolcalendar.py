@@ -18,10 +18,11 @@ strings = dict()
 strings['title'] = {'en': 'School calendar', 'de': 'Schulkalender', 'it': 'Calendario scolastico', 'la': 'Calënder de scola'}
 strings['first_teaching_day'] = {'en': 'First teaching day', 'de': 'Unterrichtsbeginn', 'it': 'inizio delle lezioni', 'la': 'scumenciamënt nseniamënt'}
 strings['last_teaching_day'] = {'en': 'Last teaching day', 'de': 'Unterrichtsende', 'it': 'fine delle lezioni', 'la': 'fin nseniamënt'}
-strings['days_of_the_week'] = {'en': 'Days of the week', 'de': 'Wochentage', 'it': 'giorni settimalali', 'la': 'di dl’ena'}
+strings['day_of_the_week'] = {'en': 'Day of the week', 'de': 'Wochentag', 'it': 'giorno settimalale', 'la': 'di dl’ena'}
 strings['school_days'] = {'en': 'School days', 'de': 'Unterrichtstage', 'it': 'giorni di scuola', 'la': 'di de nseniamënt'}
 strings['total'] = {'en': 'Total', 'de': 'Insgesamt', 'it': 'somma', 'la': 'soma'}
-strings['uncovered_weekdays'] = {'en': 'Workdays without school', 'de': 'Schulfreie Arbeitstage', 'it': 'Giorni lavorativi senza scuola', 'la': 'jiens de lavur senza scola'}
+strings['year'] = {'en': 'Year', 'de': 'Jahr', 'it': 'Anno', 'la': 'onn'}
+strings['uncovered_weekdays'] = {'en': 'Workdays without school', 'de': 'Schulfreie Arbeitstage', 'it': 'Giorni lavorativi senza scuola', 'la': 'di de lavur senza scola'}
 strings['about'] = {'en': 'This calendar was created according to the resolution no. 75 of the provincial council from 23 january 2012 with <link href="https://github.com/g-gg/pyschoolcalendar-bz">pyschoolcalendar-bz</link>.',
     'de': 'Dieser Schulkalender wurde gemäß Beschluss der Landesregierung vom 23. Jänner 2012, Nr. 75, von <link href="https://github.com/g-gg/pyschoolcalendar-bz">pyschoolcalendar-bz</link> erstellt.',
     'it': 'Questo calendario scolastico è stato creato a secondo la delibera n. 75 della giunta provinciale del 23 gennaio 2012 con <link href="https://github.com/g-gg/pyschoolcalendar-bz">pyschoolcalendar-bz</link>.',
@@ -190,7 +191,10 @@ class PdfSchoolCalendar:
 
         red_cells = list()
         self.day_stats = [0] * 6
-        self.uncovered_weekdays = 0
+
+        self.uncovered_weekdays = dict()
+        for y in range(self.schoolyear_period[0].year, self.schoolyear_period[1].year + 1):
+            self.uncovered_weekdays[y] = 0
         for d in range(1,32):
             day_row = list()
             c = 0
@@ -210,7 +214,7 @@ class PdfSchoolCalendar:
 
                     if (day.weekday()>=weekendstart) or self.is_holiday(day) or (day in self.public_holidays):
                         if (not day in self.public_holidays) and (day.weekday()<weekendstart):
-                            self.uncovered_weekdays += 1
+                            self.uncovered_weekdays[day.year] += 1
                             red_cells.append(('BACKGROUND', (c, d), (c+1, d), colors.darkorange))
                             red_cells.append(('TEXTCOLOR', (c, d), (c+1, d), colors.white))
                         else:
@@ -250,12 +254,15 @@ class PdfSchoolCalendar:
         self.elements.append(Spacer(1, self.rowheight))
 
         data = list()
-        row = [strings['days_of_the_week'][self.language], '']
+        row = [strings['day_of_the_week'][self.language], '']
         for w in range(0, 6): # mon to sat
             row.append(strings_weekdays[self.language][w])
         row.append(strings['total'][self.language])
         row.append('')
-        row.append(strings['uncovered_weekdays'][self.language])
+        row.append(strings['year'][self.language])
+        for y in self.uncovered_weekdays.keys():
+            row.append(str(y))
+        row.append(strings['total'][self.language])
         data.append(row)
         row = [strings['school_days'][self.language], '']
         total = 0
@@ -264,15 +271,20 @@ class PdfSchoolCalendar:
             total += self.day_stats[w]
         row.append(str(total))
         row.append('')
-        row.append(str(self.uncovered_weekdays))
+        row.append(strings['uncovered_weekdays'][self.language])
+        total = 0
+        for x in self.uncovered_weekdays.values():
+            row.append(str(x))
+            total += x
+        row.append(str(total))
         data.append(row)
         
-        t = Table(data, colWidths=20*units.mm, rowHeights=self.rowheight)
+        t = Table(data, rowHeights=self.rowheight)
         style = [
             ('ALIGN', (0,0), (-1,-1), 'CENTER'),
             ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
-            ('INNERGRID', (2,0), (-3,-1), 1, colors.black),
-            ('INNERGRID', (-1,0), (-1,-1), 1, colors.black),
+            ('INNERGRID', (2,0), (8,-1), 1, colors.black),
+            ('INNERGRID', (-len(self.uncovered_weekdays.keys())-2,0), (-1,-1), 1, colors.black),
             ('FONTSIZE', (0,0), (-1,-1), self.smallfontsize),
             ]
             

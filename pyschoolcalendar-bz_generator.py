@@ -55,7 +55,7 @@ class SchoolCalendarGenerator:
         # teaching ends on 16 June if this falls on a Tuesday, Wednesday, Thursday or 
         # Friday, otherwise on the preceding Friday.
         d = date(self.years[1], 6, 16)
-        if d.weekday()<1:
+        if (d.weekday() < Weekday.TUESDAY) or (d.weekday() > Weekday.FRIDAY):
             d = self.precedingWeekday(d, Weekday.FRIDAY)
         return d
 
@@ -143,7 +143,7 @@ class SchoolCalendarGenerator:
     def shortenedTimetable(self):
         # the first and last day of lessons can be freely arranged by the 
         # kindergartens and the schools. In addition, the timetable can be
-        #  shortened on Maundy Thursday.
+        # shortened on Maundy Thursday.
         shortened_time = list()
         shortened_time.append(self.firstTeachingDay())
         shortened_time.append(self.fatThursday())
@@ -208,11 +208,9 @@ class SchoolCalendarGenerator:
         self.holidays.append(self.normPeriod(self.summerHolidays(part=2), action=self.norm, scope='start'))
         
         self.warnings = list()
-        shortened = self.shortenedTimetable()
-        if shortened:
-            for d in shortened:
-                # is only single days, so no norming required
-                self.warnings.append((d, d, Strings[SchoolHolidays.Shortened][self.language]))
+        for d in self.shortenedTimetable():
+            # is only single days, so no norming required
+            self.warnings.append((d, d, Strings[SchoolHolidays.Shortened][self.language]))
 
     def exportCalendarIcs(self, outputfile, categories=None, transparent=True):
         cal = Calendar()

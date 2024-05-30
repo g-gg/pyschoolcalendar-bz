@@ -150,17 +150,17 @@ class PdfSchoolCalendar:
         t.setStyle(TableStyle(style))
         self.elements.append(t)
 
-    def is_holiday(self, d: date):
-        for h in self.holidays:
+    def is_holiday(self, day: date):
+        for holiday in self.holidays:
             # tuple (from, to)
-            if (d >= h[0]) and (d<= h[1]):
+            if (day >= holiday[0]) and (day<= holiday[1]):
                 return True
         return False
 
-    def is_warning(self, d: date):
-        for h in self.warnings:
+    def is_warning(self, day: date):
+        for warning in self.warnings:
             # tuple (from, to)
-            if (d >= h[0]) and (d<= h[1]):
+            if (day >= warning[0]) and (day<= warning[1]):
                 return True
         return False
 
@@ -212,7 +212,7 @@ class PdfSchoolCalendar:
                     else:
                         self.day_stats[day.weekday()] += 1
                         if self.is_warning(day):
-                            red_cells.append(('BACKGROUND', (c, d), (c+1, d), colors.indianred))
+                            red_cells.append(('BACKGROUND', (c, d), (c+1, d), colors.yellow))
                             red_cells.append(('TEXTCOLOR', (c, d), (c+1, d), colors.black))
                 else:
                     day_row.append('')

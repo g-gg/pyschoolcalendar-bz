@@ -39,8 +39,13 @@ endobj
 endobj
 7 0 obj
 <<
+<<<<<<< HEAD
 /Author (pyschoolcalendar-bz) /CreationDate (D:20240530213808-01'00') /Creator (\(unspecified\)) /Keywords () /ModDate (D:20240530213808-01'00') /Producer (ReportLab PDF Library - www.reportlab.com) 
   /Subject (generated on 2024-05-30T21:38:08.957863) /Title (Calendario scolastico 2023/24) /Trapped /False
+=======
+/Author (pyschoolcalendar-bz) /CreationDate (D:20240221182930-01'00') /Creator (\(unspecified\)) /Keywords () /ModDate (D:20240221182930-01'00') /Producer (ReportLab PDF Library - www.reportlab.com) 
+  /Subject (generated on 2024-02-21T18:29:30.180343) /Title (Calendario scolastico 2023/24) /Trapped /False
+>>>>>>> c93fda5291da01be2ad90a296d57121b6546199d
 >>
 endobj
 8 0 obj
@@ -70,7 +75,11 @@ xref
 trailer
 <<
 /ID 
+<<<<<<< HEAD
 [<09bc6f7223db5092e15ea643810d7e64><09bc6f7223db5092e15ea643810d7e64>]
+=======
+[<4213c6c8f514a384c0e7a32d591f7e21><4213c6c8f514a384c0e7a32d591f7e21>]
+>>>>>>> c93fda5291da01be2ad90a296d57121b6546199d
 % ReportLab generated PDF document -- digest (http://www.reportlab.com)
 
 /Info 7 0 R

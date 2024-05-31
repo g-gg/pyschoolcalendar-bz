@@ -81,7 +81,7 @@ class SchoolCalendarGenerator:
             start = self.precedingWeekday(d, Weekday.MONDAY)
             if start == d: # All Saints is on a Monday
                 start += timedelta(1)
-            end = self.followingWeekday(d, Weekday.FRIDAY)
+            end = self.followingWeekday(start, Weekday.FRIDAY)
             if end == d: # All Saints in on Friday
                 end -= timedelta(1)
         return (start, end, Strings[SchoolHolidays.AllSaints][self.language])

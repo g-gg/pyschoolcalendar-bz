@@ -1,10 +1,9 @@
 from datetime import date, timedelta, datetime
 from reportlab.pdfgen import canvas
 from reportlab.lib import pagesizes, units, colors, styles, enums
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Frame
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
 from dateutil.easter import easter
 import holidays
-
 import locale
 import threading
 from contextlib import contextmanager
@@ -21,8 +20,8 @@ strings['last_teaching_day'] = {'en': 'Last teaching day', 'de': 'Unterrichtsend
 strings['day_of_the_week'] = {'en': 'Day of the week', 'de': 'Wochentag', 'it': 'giorno settimalale', 'la': 'di dl’ena'}
 strings['school_days'] = {'en': 'School days', 'de': 'Unterrichtstage', 'it': 'giorni di scuola', 'la': 'di de nseniamënt'}
 strings['total'] = {'en': 'Total', 'de': 'Insgesamt', 'it': 'somma', 'la': 'soma'}
-strings['year'] = {'en': 'Year', 'de': 'Jahr', 'it': 'Anno', 'la': 'onn'}
-strings['uncovered_weekdays'] = {'en': 'Workdays without school', 'de': 'Schulfreie Arbeitstage', 'it': 'Giorni lavorativi senza scuola', 'la': 'di de lavur senza scola'}
+strings['year'] = {'en': 'Year', 'de': 'Jahr', 'it': 'anno', 'la': 'onn'}
+strings['uncovered_weekdays'] = {'en': 'Workdays without school', 'de': 'Schulfreie Arbeitstage', 'it': 'giorni lavorativi senza scuola', 'la': 'di de lavur senza scola'}
 strings['about'] = {'en': 'This calendar was created according to the resolution no. 75 of the provincial council from 23 january 2012 with <link href="https://github.com/g-gg/pyschoolcalendar-bz">pyschoolcalendar-bz</link>.',
     'de': 'Dieser Schulkalender wurde gemäß Beschluss der Landesregierung vom 23. Jänner 2012, Nr. 75, von <link href="https://github.com/g-gg/pyschoolcalendar-bz">pyschoolcalendar-bz</link> erstellt.',
     'it': 'Questo calendario scolastico è stato creato a secondo la delibera n. 75 della giunta provinciale del 23 gennaio 2012 con <link href="https://github.com/g-gg/pyschoolcalendar-bz">pyschoolcalendar-bz</link>.',
